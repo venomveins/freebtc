@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitAddress with Balances</title>
+    <script src="bitaddress.org-master/src/bitaddress.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .wallet { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>BitAddress with Manual Balances</h1>
+    <button onclick="generateWallet()">Generate New Wallet</button>
+    <button onclick="exportWallets()">Export JSON</button>
+    <div id="wallets"></div>
+    
+    <script>
+        let wallets = [];
+        
+        function generateWallet() {
+            let key = new bitaddress.ECKey(false);
+            let address = key.getBitcoinAddress();
+            let privateKey = key.getWIF();
+            
+            let wallet = { address, privateKey, balance: 0 };
+            wallets.push(wallet);
+            displayWallets();
+        }
+        
+        function displayWallets() {
+            let container = document.getElementById("wallets");
+            container.innerHTML = "";
+            wallets.forEach((wallet, index) => {
+                let div = document.createElement("div");
+                div.className = "wallet";
+                div.innerHTML = `
+                    <p><strong>Address:</strong> ${wallet.address}</p>
+                    <p><strong>Private Key:</strong> ${wallet.privateKey}</p>
+                    <p><strong>Balance:</strong> <input type="number" value="${wallet.balance}" oninput="updateBalance(${index}, this.value)"></p>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function updateBalance(index, value) {
+            wallets[index].balance = parseFloat(value) || 0;
+        }
+        
+        function exportWallets() {
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wallets, null, 2));
+            let downloadAnchor = document.createElement("a");
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "wallets.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
+</body>
+</html>
